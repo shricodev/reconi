@@ -1,7 +1,7 @@
 #!/bin/bash
 # Author: Piyush Acharya (ReAl_I)
 # Date: 2021/07/14
-# Usage: This is a simple Shell script to run some of my goto tools for recon.                                                               
+# Usage: This is a simple Shell script to install some of my goto tools for recon.                                                               
 apt install figlet > /dev/null 2>&1
 figlet -c Installer script
 echo "                                                          @Author: Piyush Acharya"
