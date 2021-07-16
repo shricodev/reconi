@@ -4,7 +4,7 @@
 #Usage: This is a small script to run some of my goto tools for reconnaisance.
 
 apt install figlet > /dev/null 2>&1
-figlet -c Recon_I
+figlet -c reconi
 echo "                                                          @Author: Piyush Acharya"
 echo "                                                        https://github.com/realix01"
 echo
