@@ -43,6 +43,11 @@ apt install nmap
 echo
 echo "[+] Installing amass"
 apt install amass
+echo "[+] Installing SubFinder"
+GO111MODULE=on go get -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder
+echo
+echo "[+] Moving subfinder to /opt directory"
+mv /root/go/bin/subfinder /opt
 echo
 echo "[+] Installing naabu"
 GO111MODULE=on go get -v github.com/projectdiscovery/naabu/v2/cmd/naabu
