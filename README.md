@@ -1,2 +1,2 @@
 # ReconScripts - Self-Created
-This repository contains some of my self made recon scripts to run in my VPS.
+reconi is a recon automate script to automate some of the time consuming tasks.
