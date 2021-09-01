@@ -1,77 +1,102 @@
 #!/bin/bash
-# Author: Piyush Acharya(ReAl_I)
+# Author: Piyush Achärya (r3alix01)
 # Date: 2021/07/16
 # Usage: This is a small script to run some of my goto tools for reconnaisance.
 
 apt install figlet > /dev/null 2>&1
 figlet -c reconi
-echo "                                                          @Author: Piyush Acharya"
-echo "                                                        https://github.com/realix01"
+echo "                                                         @Author: Piyush Achärya"
+echo "                                                        https://github.com/r3alix01"
 echo "Usage: reconi.sh <options>"
-echo "Options: -amass -gau -waybackurls -nuclei -nucleiurls -naabu -all"
+echo "Options: -amass -subfinder -sublist3r -assetfinder -gau -waybackurls -nuclei -nucleiurls -naabu"
 echo
-read -p "Enter the domain: " domain
+red=`tput setaf 1`
+green=`tput setaf 2`
+reset=`tput sgr0`
+user=$(who | awk '{print $1}')
+echo "${green}Can only use one argument at a time${reset} ${red}(recommended: -all)${reset}"
+echo "${green}Developers assume no liability and are not responsible for any misuse or damage caused by this program. Only use for educational purposes.${reset}"
+echo "${red}Alert: Run this script as root${reset}"
+mkdir reconi_output
+cd ./reconi_output
+echo
+read -p "${green}Enter the domain:${reset} " domain
 case "${1}" in
 -amass)
-echo "[+] Running amass for subdomain enumeration."
+echo "${green}[+] Running amass [-active] for subdomain enumeration.${reset}"
 echo
-amass enum -active -d $domain -o domains.txt
+amass enum -active -d $domain -o Amass_$domain.txt
 ;;
 -subfinder)
 echo
-echo "[+] Running subfinder on the target domain."
-subfinder -d $domain -all -v
+echo "${green}[+] Running subfinder on the target domain.${reset}"
+/opt/subfinder -d $domain -all -v |  tee Subfinder_$domain.txt 
+;;
+-sublist3r)
+echo
+echo "${green}[+] Running sublist3r on the target domain${reset}"
+sublist3r -d $domain -v -o Sublist3r_$domain.txt
+;;
+-assetfinder)
+echo "${green}[+] Running assetfinder on the target domain.${reset}"
+/opt/assetfinder --subs-only $domain | tee Assetfinder_$domain.txt
 ;;
 -gau)
 echo
-echo "[+] Running gau on the target domain."
-getallurls -subs > urls.txt
+echo "${green}[+] Running gau on the target domain.${reset}"
+getallurls -subs -v | sort -u | tee Gau_$domain.txt
 ;;
 -waybackurls)
 echo
-echo "[+] Running waybackurls on the target domain."
-/opt/waybackurls -v >> urls.txt | cat urls.txt
+echo "${green}[+] Running waybackurls on the target domain.${reset}"
+/opt/waybackurls $domain | tee Waybackurl_$domain.txt
 ;;
 -nuclei)
 echo
-echo "[+] Running nuclei on the target domain."
-/opt/nuclei -t ~/nuclei-templates -u $domain
+echo "${green}[+] Running nuclei on the target domain.${reset}"
+echo "${red}Alert: It will only run on the target domain not on all sub-domains.${reset}"
+/opt/nuclei -u https://$domain -t /root/$user/nuclei-templates -o Nuclei_$domain.txt
 ;;
 -nucleiurls)
 echo
-echo "[+] Running nuclei on the given urls."
-/opt/nuclei -t ~/nuclei-templates -l urls.txt
+echo "${green}[+] Running nuclei on the target url.${reset}"
+echo "${red}Alert: This option is supported only after running waybackurls and gau${reset}"
+cat gau_$domain.txt waybackurls_$domain.txt | /opt/httpx | tee Liveurls_$domain.txt | /opt/nuclei -l ./Liveurls_$domain.txt -t ~/nuclei-templates -c 100 -o Nucleiurl_$domain.txt
 ;;
 -naabu)
 echo
-echo "[+] Running naabu on the list of domains."
-/opt/naabu -p -host $domain
+echo "${green}[+] Running naabu on the target domain.${reset}"
+/opt/naabu -host $domain | tee Naabu_$domain.txt
 ;;
 -all)
 echo
-echo "[+] Running every tools on the target domain"
+echo "${green}[+] Running all the tools sublist3r, subfinder, amass, assetfinder, gau, waybackurls, nuclei, nucleiurls and naabu${reset}"
+echo "${green}[+] Running sublist3r on the target domain${reset}"
+sublist3r -d $domain -v -o sublister_$domain.txt
 echo
-echo "[+] Running amass for subdomain enumeration."
-amass enum -active -d $domain -v -nolocaldb -o domains.txt
+echo "${green}[+] Running subfinder on the target domain.${reset}"
+/opt/subfinder -d $domain -all -v |  tee subfinder_$domain.txt
 echo
-echo "[+] Running subfinder on the target domain."
-subfinder -d $domain -all -v >> domains.txt
-echo "[+] Sorting unique sub-domains"
-cat domains.txt | sort -u | uniq > domains_sorted.txt | cat domains_sorted.txt
+echo "${green}[+] Running assetfinder on the target domain.${reset}"
+/opt/assetfinder --subs-only $domain | tee assetfinder_$domain.txt
 echo
-echo "[+] Running gau on the target domain." 
-cat domains_sorted.txt | getallurls > urls.txt
+echo "${green}[+] Running amass for subdomain enumeration.${reset}"
+amass enum -active -d $domain -o amass_$domain.txt
 echo
-echo "[+] Running waybackurls on the target domain."
-cat domains_sorted.txt | /opt/waybackurls -v >> urls.txt | cat urls.txt
+echo "${green}[+] Running gau on the target domain.${reset}"
+cat amass_$domain.txt subfinder_$domain.txt sublist3r_$domain.txt assetfinder_$domain.txt | sort -u | getallurls | sort -u | tee gau_$domain.txt
 echo
-echo "[+] Running nuclei on the target domain."
-/opt/nuclei -t ~/nuclei-templates -l domains_sorted.txt
+echo "${green}[+] Running waybackurls on the target domain.${reset}"
+cat amass_$domain.txt subfinder_$domain.txt sublist3r_$domain.txt assetfinder_$domain.txt | sort -u | /opt/waybackurls $domain | sort -u | tee waybackurls_$domain.txt
 echo
-echo "[+] Running nuclei on the given urls."
-/opt/nuclei -t ~/nuclei-templates -l urls.txt
+echo "${green}[+] Running nuclei on the target domain.${reset}"
+cat amass_$domain.txt subfinder_$domain.txt sublist3r_$domain.txt assetfinder_$domain.txt | sort -u | tee allsubs_$domain.txt | /opt/httpx -silent | tee liveallsubs_$domain.txt
+/opt/nuclei -l ./liveallsubs_$domain.txt -t ~/nuclei-templates -c 100 -o nucleisubs_$domain.txt
 echo
-echo "[+] Running naabu on the list of domains."
-/opt/naabu -iL -p domains_sorted.txt
+echo "${green}[+] Running naabu on the list of domains.${reset}"
+/opt/naabu -iL liveallsubs_$domain.txt | tee naabulive_$domain.txt
+echo
+echo "${green}[+] Running nuclei on the given urls.${reset}"
+cat gau_$domain.txt waybackurls_$domain.txt | /opt/httpx | egrep -v '(.js|.png|.svg|.jpeg|.jpg|.gif)' | tee liveurls_$domain.txt | /opt/nuclei -l ./liveurls_$domain.txt -t ~/nuclei-templates
 ;;
 esac
