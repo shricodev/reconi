@@ -1,5 +1,5 @@
 #!/bin/bash
-# Author: Piyush Achärya (r3alix01)
+# Author: Shrijal Achärya (YuShx01)
 # Date: 2021/07/16
 # Usage: This is a small script to run some of my goto tools for reconnaisance.
 
